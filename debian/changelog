@@ -1,0 +1,5 @@
+fcitx-configtool (0.2.0-1) unstable; urgency=low
+
+  * Initial release (Closes: #604022)
+
+ -- Aron Xu <happyaron.xu@gmail.com>  Sat, 18 Dec 2010 15:45:45 +0800

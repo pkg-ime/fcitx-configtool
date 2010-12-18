@@ -1,0 +1,29 @@
+Source: fcitx-configtool
+Section: utils
+Priority: optional
+Maintainer: Aron Xu <happyaron.xu@gmail.com>
+DM-Upload-Allowed: yes
+Build-Depends: debhelper (>= 7.0.50~), cmake, quilt (>= 0.46-7~), fcitx (>= 1:4.0.1), intltool, libunique-dev, libgtk2.0-dev (>= 2.10)
+Standards-Version: 3.9.1
+Homepage: http://code.google.com/p/fcitx
+Vcs-Bzr: lp:~pkg-ime/fcitx/debian-fcitx-configtool
+Vcs-Browser: https://code.launchpad.net/~pkg-ime/fcitx/debian-fcitx-configtool
+
+Package: fcitx-config-common
+Architecture: all
+Depends: ${misc:Depends}
+Description: graphic fcitx configuration tool - common files
+ fcitx is a small and fast input server initially designed for Chinese,
+ which is also useful for some other languages (especially CJK) now.
+ .
+ This package provides common files for the graphic configuration tool.
+
+
+Package: fcitx-config-gtk
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, fcitx-config-common (= ${source:Version})
+Description: graphic fcitx configuration tool
+ fcitx is a small and fast input server initially designed for Chinese, 
+ which is also useful for some other languages (especially CJK) now.
+ .
+ This package provides GTK+ version of the graphic configuration tool.
