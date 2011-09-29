@@ -1,29 +1,44 @@
 Source: fcitx-configtool
 Section: utils
 Priority: optional
-Maintainer: Aron Xu <happyaron.xu@gmail.com>
-DM-Upload-Allowed: yes
-Build-Depends: debhelper (>= 7.0.50~), cmake, quilt (>= 0.46-7~), fcitx (>= 1:4.0.1), intltool, libunique-dev, libgtk2.0-dev (>= 2.10)
-Standards-Version: 3.9.1
+Maintainer: IME Packaging Team <pkg-ime-devel@lists.debian.org>
+Uploaders: Aron Xu <aron@debian.org>
+Build-Depends: debhelper (>= 8), cmake, fcitx-libs-dev, intltool, libunique-dev, libgtk2.0-dev (>= 2.10)
+Standards-Version: 3.9.2
 Homepage: http://code.google.com/p/fcitx
-Vcs-Bzr: lp:~pkg-ime/fcitx/debian-fcitx-configtool
-Vcs-Browser: https://code.launchpad.net/~pkg-ime/fcitx/debian-fcitx-configtool
+Vcs-Git: git://git.debian.org/pkg-ime/fcitx-configtool.git
+Vcs-Browser: http://git.debian.org/?p=pkg-ime/fcitx-configtool.git
 
 Package: fcitx-config-common
 Architecture: all
 Depends: ${misc:Depends}
-Description: graphic fcitx configuration tool - common files
- fcitx is a small and fast input server initially designed for Chinese,
- which is also useful for some other languages (especially CJK) now.
+Description: graphic Fcitx configuration tool - common files
+ Fcitx is the Free Chinese Input Toy of X, which was initially designed
+ for Chinese users, and used XIM protocol. Now it has already evolved
+ into a highly modularized, feature rich input method framework for
+ Unix-like platforms supporting a considerable amount of frontends,
+ backends and modules.
+ .
+ It is an ideal choice for the vast majority. Many of its features make
+ users of Unix-like platforms have a fully modern input experience for
+ the first time. It has also greatly lower the threshold for developers,
+ making the development of extended funtions much easier than ever before.
  .
  This package provides common files for the graphic configuration tool.
-
 
 Package: fcitx-config-gtk
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, fcitx-config-common (= ${source:Version})
-Description: graphic fcitx configuration tool
- fcitx is a small and fast input server initially designed for Chinese, 
- which is also useful for some other languages (especially CJK) now.
+Description: graphic Fcitx configuration tool
+ Fcitx is the Free Chinese Input Toy of X, which was initially designed
+ for Chinese users, and used XIM protocol. Now it has already evolved
+ into a highly modularized, feature rich input method framework for
+ Unix-like platforms supporting a considerable amount of frontends,
+ backends and modules.
+ .
+ It is an ideal choice for the vast majority. Many of its features make
+ users of Unix-like platforms have a fully modern input experience for
+ the first time. It has also greatly lower the threshold for developers,
+ making the development of extended funtions much easier than ever before.
  .
  This package provides GTK+ version of the graphic configuration tool.

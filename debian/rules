@@ -1,16 +1,3 @@
 #!/usr/bin/make -f
-
-LDFLAGS=-Wl,--as-needed
-
 %:
 	dh  $@
-
-override_dh_auto_configure:
-	rm -rf debian/po.bak
-	mkdir debian/po.bak
-	cp po/*.po debian/po.bak
-	dh_auto_configure
-override_dh_auto_clean:
-	dh_auto_clean
-	if [ -d debian/po.bak ];then cp debian/po.bak/*.po po; fi
-	rm -rf debian/po.bak
