@@ -1,3 +1,9 @@
+fcitx-configtool (0.3.1-1build1) unstable; urgency=low
+
+  * No change rebuild in updated build environment.
+
+ -- Aron Xu <aron@debian.org>  Mon, 03 Oct 2011 10:58:55 +0800
+
 fcitx-configtool (0.3.1-1) unstable; urgency=low
 
   * New upstream release.
