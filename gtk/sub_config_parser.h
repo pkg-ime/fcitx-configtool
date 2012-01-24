@@ -17,23 +17,43 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef MAIN_WINDOW_H
+#ifndef _SUB_CONFIG_PARSER_H
+#define _SUB_CONFIG_PARSER_H
+#include <glib/ghash.h>
 
-#define MAIN_WINDOW_H
-
-#include <gtk/gtk.h>
-#include <fcitx-config/fcitx-config.h>
-
-typedef struct ConfigPage
+typedef enum
 {
-    GtkWidget* page;
-    GtkTreeIter iter;
-} ConfigPage;
+    SC_None,
+    SC_ConfigFile,
+    SC_NativeFile
+} SubConfigType;
 
-GtkWidget* fcitx_config_main_window_new(void);
+typedef struct
+{
+    SubConfigType type;
+    gchar* configdesc;
+    gchar* nativepath;
+    gchar** patternlist;
+} FcitxSubConfigPattern;
 
-gboolean response_cb (GtkDialog *dialog,
-                    gint response,
-                    gpointer user_data);
+typedef struct
+{
+    gchar* name;
+    SubConfigType type;
+    GList* filelist;
+    gchar* nativepath;
+    gchar* configdesc;
+} FcitxSubConfig;
+
+typedef struct
+{
+    GHashTable* subconfigs;
+    gchar* domain;
+} FcitxSubConfigParser;
+
+FcitxSubConfigParser* sub_config_parser_new(const gchar* subconfig);
+void sub_config_parser_free(FcitxSubConfigParser* parser);
+FcitxSubConfig* sub_config_new(const gchar* name, FcitxSubConfigPattern* pattern);
+void sub_config_free(FcitxSubConfig* subconfig);
 
 #endif

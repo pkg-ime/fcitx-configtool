@@ -17,23 +17,45 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef MAIN_WINDOW_H
-
-#define MAIN_WINDOW_H
+#ifndef _FCITX_SUB_CONFIG_WIDGET
+#define _FCITX_SUB_CONFIG_WIDGET
 
 #include <gtk/gtk.h>
-#include <fcitx-config/fcitx-config.h>
+#include "sub_config_parser.h"
 
-typedef struct ConfigPage
-{
-    GtkWidget* page;
-    GtkTreeIter iter;
-} ConfigPage;
+G_BEGIN_DECLS
 
-GtkWidget* fcitx_config_main_window_new(void);
+#define FCITX_TYPE_SUB_CONFIG_WIDGET fcitx_sub_config_widget_get_type()
 
-gboolean response_cb (GtkDialog *dialog,
-                    gint response,
-                    gpointer user_data);
+#define FCITX_SUB_CONFIG_WIDGET(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), FCITX_TYPE_SUB_CONFIG_WIDGET, FcitxSubConfigWidget))
 
-#endif
+#define FCITX_SUB_CONFIG_WIDGET_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), FCITX_TYPE_SUB_CONFIG_WIDGET, FcitxSubConfigWidgetClass))
+
+#define FCITX_IS_SUB_CONFIG_WIDGET(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), FCITX_TYPE_SUB_CONFIG_WIDGET))
+
+#define FCITX_IS_SUB_CONFIG_WIDGET_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), FCITX_TYPE_SUB_CONFIG_WIDGET))
+
+#define FCITX_SUB_CONFIG_WIDGET_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), FCITX_TYPE_SUB_CONFIG_WIDGET, FcitxSubConfigWidgetClass))
+
+typedef struct {
+    GtkVBox parent;
+    FcitxSubConfig* subconfig;
+    GtkWidget* view;
+} FcitxSubConfigWidget;
+
+typedef struct {
+    GtkVBoxClass parent_class;
+} FcitxSubConfigWidgetClass;
+
+GType fcitx_sub_config_widget_get_type (void);
+
+FcitxSubConfigWidget* fcitx_sub_config_widget_new (FcitxSubConfig* subconfig);
+
+G_END_DECLS
+
+#endif /* _FCITX_SUB_CONFIG_WIDGET */

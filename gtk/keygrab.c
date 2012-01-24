@@ -1,3 +1,22 @@
+/***************************************************************************
+ *   Copyright (C) 2010~2011 by CSSlayer                                   *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
+
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 #include <libintl.h>
@@ -16,8 +35,6 @@ enum {
 static gint keygrab_button_signals[LAST_SIGNAL] = { 0 };
 static void keygrab_button_init(KeyGrabButton *keygrab_button);
 static void keygrab_button_class_init(KeyGrabButtonClass *keygrabbuttonclass);
-static void changed(void);
-static void current_changed(void);
 static void begin_key_grab(KeyGrabButton* self, gpointer v);
 static void end_key_grab(KeyGrabButton *self);
 static GtkWidget* popup_new(GtkWidget* parent, const gchar* text, gboolean mouse);
@@ -35,6 +52,7 @@ GtkType keygrab_button_get_type(void)
             sizeof(KeyGrabButtonClass),
             (GtkClassInitFunc)keygrab_button_class_init,
             (GtkObjectInitFunc)keygrab_button_init,
+            NULL,
             NULL,
             NULL
         };
@@ -84,7 +102,7 @@ void begin_key_grab(KeyGrabButton* self, gpointer v)
     b->handler = gtk_signal_connect(GTK_OBJECT(b->popup), "key-press-event", GTK_SIGNAL_FUNC(on_key_press_event), b);
 
     while(gdk_keyboard_grab(gtk_widget_get_window(GTK_WIDGET(b->popup)), FALSE, GDK_CURRENT_TIME) != GDK_GRAB_SUCCESS)
-           usleep(100); 
+           usleep(100);
 }
 
 void end_key_grab(KeyGrabButton *self)
@@ -101,10 +119,19 @@ void on_key_press_event(GtkWidget *self, GdkEventKey *event, gpointer v)
     guint key;
     GdkModifierType mods = event->state & gtk_accelerator_get_default_mod_mask();
 
+#if GTK_MINOR_VERSION < 22
+    if ((event->keyval == GDK_Escape
+            || event->keyval == GDK_Return) && !mods)
+#else
     if ((event->keyval == GDK_KEY_Escape
             || event->keyval == GDK_KEY_Return) && !mods)
+#endif
     {
+#if GTK_MINOR_VERSION < 22
+        if (event->keyval == GDK_Escape)
+#else
         if (event->keyval == GDK_KEY_Escape)
+#endif
             gtk_signal_emit_by_name(GTK_OBJECT(b), "changed", b->key, b->mods);
         end_key_grab(b);
         keygrab_button_set_key(b, 0, 0);
@@ -112,11 +139,16 @@ void on_key_press_event(GtkWidget *self, GdkEventKey *event, gpointer v)
     }
 
     key = gdk_keyval_to_upper(event->keyval);
+#if GTK_MINOR_VERSION < 22
+    if (key == GDK_ISO_Left_Tab)
+        key = GDK_Tab;
+#else
     if (key == GDK_KEY_ISO_Left_Tab)
         key = GDK_KEY_Tab;
+#endif
 
     if (gtk_accelerator_valid(key, mods)
-            || (key == GDK_KEY_Tab && mods))
+            || (key == GDK_Tab && mods))
     {
         keygrab_button_set_key(b, key, mods);
         end_key_grab(b);
@@ -164,7 +196,7 @@ GtkWidget* popup_new(GtkWidget* parent, const gchar* text, gboolean mouse)
 {
     GtkWidget* w = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_type_hint(GTK_WINDOW(w), GDK_WINDOW_TYPE_HINT_UTILITY);
-    gtk_window_set_position(GTK_WINDOW(w), mouse && GTK_WIN_POS_MOUSE || GTK_WIN_POS_CENTER_ALWAYS);
+    gtk_window_set_position(GTK_WINDOW(w), mouse ? GTK_WIN_POS_MOUSE : GTK_WIN_POS_CENTER_ALWAYS);
     if (parent)
         gtk_window_set_transient_for(GTK_WINDOW(w), GTK_WINDOW(gtk_widget_get_toplevel(parent)));
     gtk_window_set_modal(GTK_WINDOW(w), TRUE);
