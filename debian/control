@@ -2,8 +2,9 @@ Source: fcitx-configtool
 Section: utils
 Priority: optional
 Maintainer: IME Packaging Team <pkg-ime-devel@lists.debian.org>
-Uploaders: Aron Xu <aron@debian.org>
-Build-Depends: debhelper (>= 9), cmake, fcitx-libs-dev (>= 1:4.2.0), intltool,
+Uploaders: Aron Xu <aron@debian.org>, YunQiang Su <wzssyqa@gmail.com>
+DM-Upload-Allowed: yes
+Build-Depends: debhelper (>= 8), cmake, fcitx-libs-dev (>= 1:4.2.0), intltool,
  libunique-dev, libgtk-3-dev, iso-codes
 Standards-Version: 3.9.2
 Homepage: http://code.google.com/p/fcitx
