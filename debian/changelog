@@ -1,6 +1,7 @@
 fcitx-configtool (0.4.0-1) unstable; urgency=low
 
-  * New upstream release: for fcitx 4.2.0. 
+  * New upstream release: for fcitx 4.2.0.
+  * Build with Gtk+3.
 
  -- YunQiang Su <wzssyqa@gmail.com>  Sun, 05 Feb 2012 22:07:14 +0800
 

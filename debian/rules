@@ -7,3 +7,6 @@ CXXFLAGS += $(CPPFLAGS)
 
 %:
 	dh  $@
+
+override_dh_auto_configure:
+	dh_auto_configure -Scmake -- -DENABLE_GTK2=Off -DENABLE_GTK3=On
