@@ -14,7 +14,7 @@
  *   You should have received a copy of the GNU General Public License     *
  *   along with this program; if not, write to the                         *
  *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
 #include <limits.h>
@@ -22,8 +22,7 @@
 #include <dirent.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <glib/gstrfuncs.h>
-#include <glib/gpattern.h>
+#include <glib.h>
 
 #include <fcitx-config/xdg.h>
 #include <fcitx-utils/log.h>
@@ -41,12 +40,10 @@ static SubConfigType parse_type(const gchar* str);
 
 static SubConfigType parse_type(const gchar* str)
 {
-    if (strcmp(str, "native") == 0)
-    {
+    if (strcmp(str, "native") == 0) {
         return SC_NativeFile;
     }
-    if (strcmp(str, "configfile") == 0)
-    {
+    if (strcmp(str, "configfile") == 0) {
         return SC_ConfigFile;
     }
     return SC_None;
@@ -62,8 +59,7 @@ FcitxSubConfigParser* sub_config_parser_new(const gchar* subconfig)
     gchar** strv = g_strsplit(subconfig, ",", 0);
 
     gchar** str;
-    for (str = &strv[0]; *str != NULL; str++)
-    {
+    for (str = &strv[0]; *str != NULL; str++) {
         if (strchr(*str, ':') == NULL)
             continue;
 
@@ -74,8 +70,7 @@ FcitxSubConfigParser* sub_config_parser_new(const gchar* subconfig)
         if (strlen(items[0]) == 0)
             goto end;
 
-        if (strcmp(items[1], "domain") == 0)
-        {
+        if (strcmp(items[1], "domain") == 0) {
             parser->domain = g_strdup(items[0]);
             goto end;
         }
@@ -83,18 +78,15 @@ FcitxSubConfigParser* sub_config_parser_new(const gchar* subconfig)
         SubConfigType type = parse_type(items[1]);
         if (type == SC_None)
             goto end;
-        if (g_hash_table_lookup (parser->subconfigs, items[0]) != NULL)
+        if (g_hash_table_lookup(parser->subconfigs, items[0]) != NULL)
             continue;
 
-        if (type == SC_ConfigFile)
-        {
+        if (type == SC_ConfigFile) {
             if (g_strv_length(items) != 4)
                 goto end;
             if (strlen(items[2]) == 0 || items[2][0] == '/')
                 goto end;
-        }
-        else if (type == SC_NativeFile)
-        {
+        } else if (type == SC_NativeFile) {
             if (g_strv_length(items) != 3)
                 goto end;
             if (strchr(items[2], '*') != NULL)
@@ -102,14 +94,12 @@ FcitxSubConfigParser* sub_config_parser_new(const gchar* subconfig)
         }
 
         gchar** paths = g_strsplit(items[2], "/", 0);
-        if (paths[0] == 0)
-        {
+        if (paths[0] == 0) {
             g_strfreev(paths);
             goto end;
         }
         gchar** path;
-        for (path = &paths[0]; *path != NULL; path++)
-        {
+        for (path = &paths[0]; *path != NULL; path++) {
             if (strlen(*path) == 0)
                 break;
             if (strcmp(*path, ".") == 0)
@@ -117,8 +107,7 @@ FcitxSubConfigParser* sub_config_parser_new(const gchar* subconfig)
             if (strcmp(*path, "..") == 0)
                 break;
         }
-        if (*path != NULL)
-        {
+        if (*path != NULL) {
             g_strfreev(paths);
             goto end;
         }
@@ -131,12 +120,11 @@ FcitxSubConfigParser* sub_config_parser_new(const gchar* subconfig)
             pattern->nativepath = g_strdup(items[2]);
 
         g_hash_table_insert(parser->subconfigs, g_strdup(items[0]), pattern);
-end:
+    end:
         g_strfreev(items);
     }
     g_strfreev(strv);
-    if (g_hash_table_size(parser->subconfigs) == 0 || parser->domain == NULL)
-    {
+    if (g_hash_table_size(parser->subconfigs) == 0 || parser->domain == NULL) {
         sub_config_parser_free(parser);
         parser = NULL;
     }
@@ -206,20 +194,20 @@ GList* sub_config_pattern_get_filelist(FcitxSubConfigPattern* pattern)
 {
     size_t size, i;
     GList* result = NULL;
-    char** xdgpath = GetXDGPath(&size, "XDG_CONFIG_HOME", ".config" , PACKAGE , DATADIR, PACKAGE);
+    char** xdgpath = FcitxXDGGetPath(&size, "XDG_CONFIG_HOME", ".config" , PACKAGE , DATADIR, PACKAGE);
 
-    for (i = 0; i < size; i ++)
-    {
+    for (i = 0; i < size; i ++) {
         char* dirpath = realpath(xdgpath[i], NULL);
+
+        if (!dirpath)
+            continue;
 
         GList* list = get_files_by_pattern(dirpath, pattern, 0), *l;
 
         for (l = g_list_first(list);
                 l != NULL;
-                l = l->next)
-        {
-            if (strncmp(dirpath, (gchar*) l->data, strlen(dirpath)) == 0)
-            {
+                l = l->next) {
+            if (strncmp(dirpath, (gchar*) l->data, strlen(dirpath)) == 0) {
                 gchar* filename = (gchar*) l->data;
                 gchar* name = filename + strlen(dirpath);
                 while (name[0] == '/')
@@ -233,7 +221,7 @@ GList* sub_config_pattern_get_filelist(FcitxSubConfigPattern* pattern)
         free(dirpath);
     }
 
-    FreeXDGPath(xdgpath);
+    FcitxXDGFreePath(xdgpath);
 
     return result;
 }
@@ -250,32 +238,27 @@ GList* get_files_by_pattern(const gchar* dirpath, FcitxSubConfigPattern* pattern
 
     struct dirent* drt;
     GPatternSpec * patternspec = g_pattern_spec_new(filter);
-    while ((drt = readdir(dir)) != NULL)
-    {
+    while ((drt = readdir(dir)) != NULL) {
         if (strcmp(drt->d_name , ".") == 0 || strcmp(drt->d_name, "..") == 0)
             continue;
 
         if (!g_pattern_match_string(patternspec, drt->d_name))
             continue;
 
-        if (pattern->patternlist[index + 1] == 0)
-        {
-            char path[PATH_MAX];
-            snprintf(path, PATH_MAX, "%s/%s", dirpath, drt->d_name);
-            path[PATH_MAX - 1] = '\0';
+        if (pattern->patternlist[index + 1] == 0) {
+            char *path;
+            asprintf(&path, "%s/%s", dirpath, drt->d_name);
             struct stat statbuf;
-            if (stat(path, &statbuf) == 0)
-            {
+            if (stat(path, &statbuf) == 0) {
                 result = g_list_append(result, realpath(path, NULL));
             }
-        }
-        else
-        {
-            char path[PATH_MAX];
-            snprintf(path, PATH_MAX, "%s/%s", dirpath, drt->d_name);
-            path[PATH_MAX - 1] = '\0';
+            free(path);
+        } else {
+            char *path;
+            asprintf(&path, "%s/%s", dirpath, drt->d_name);
             GList* r = get_files_by_pattern(path, pattern, index + 1);
             result = g_list_concat(result, r);
+            free(path);
         }
     }
 

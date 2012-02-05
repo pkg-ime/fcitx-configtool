@@ -14,7 +14,7 @@
  *   You should have received a copy of the GNU General Public License     *
  *   along with this program; if not, write to the                         *
  *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
 #ifndef KEYGRAB_H
@@ -23,7 +23,7 @@
 #include <gtk/gtk.h>
 //定义类型宏和转换宏
 #define TYPE_KEYGRAB_BUTTON   (keygrab_button_get_type())
-#define KEYGRAB_BUTTON(obj)   (GTK_CHECK_CAST(obj,TYPE_KEYGRAB_BUTTON,KeyGrabButton))
+#define KEYGRAB_BUTTON(obj)   (G_TYPE_CHECK_INSTANCE_CAST(obj,TYPE_KEYGRAB_BUTTON,KeyGrabButton))
 //定义实例结构和类结构
 typedef struct _KeyGrabButton KeyGrabButton;
 typedef struct _KeyGrabButtonClass KeyGrabButtonClass;
@@ -40,7 +40,7 @@ struct _KeyGrabButtonClass {
     void (*current_changed)(int, int);
 };
 
-GtkType keygrab_button_get_type(void);
+GType keygrab_button_get_type(void);
 GtkWidget* keygrab_button_new(void);
 gchar *accelerator_to_fcitx_hotkey(const gchar* str);
 void keygrab_button_set_key(KeyGrabButton* self, guint key, GdkModifierType mods);
