@@ -14,7 +14,7 @@
  *   You should have received a copy of the GNU General Public License     *
  *   along with this program; if not, write to the                         *
  *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
 #ifndef MAIN_WINDOW_H
@@ -24,16 +24,53 @@
 #include <gtk/gtk.h>
 #include <fcitx-config/fcitx-config.h>
 
-typedef struct ConfigPage
-{
+#include "common.h"
+
+G_BEGIN_DECLS
+
+#define FCITX_TYPE_MAIN_WINDOW fcitx_main_window_get_type()
+
+#define FCITX_MAIN_WINDOW(obj) \
+    (G_TYPE_CHECK_INSTANCE_CAST ((obj), FCITX_TYPE_MAIN_WINDOW, FcitxMainWindow))
+
+#define FCITX_MAIN_WINDOW_CLASS(klass) \
+    (G_TYPE_CHECK_CLASS_CAST ((klass), FCITX_TYPE_MAIN_WINDOW, FcitxMainWindowClass))
+
+#define FCITX_IS_MAIN_WINDOW(obj) \
+    (G_TYPE_CHECK_INSTANCE_TYPE ((obj), FCITX_TYPE_MAIN_WINDOW))
+
+#define FCITX_IS_MAIN_WINDOW_CLASS(klass) \
+    (G_TYPE_CHECK_CLASS_TYPE ((klass), FCITX_TYPE_MAIN_WINDOW))
+
+#define FCITX_MAIN_WINDOW_GET_CLASS(obj) \
+    (G_TYPE_INSTANCE_GET_CLASS ((obj), FCITX_TYPE_MAIN_WINDOW, FcitxMainWindowClass))
+
+typedef struct {
     GtkWidget* page;
     GtkTreeIter iter;
 } ConfigPage;
 
-GtkWidget* fcitx_config_main_window_new(void);
+typedef struct {
+    GtkWindow parent;
+    GtkWidget* pageview;
+    GtkListStore *pagestore;
+    GtkWidget* hpaned;
+    ConfigPage* impage;
+    ConfigPage* configpage;
+    ConfigPage* lastpage;
+    ConfigPage* addonpage;
+    GtkWidget* button;
+    GtkWidget* addonview;
+    UT_array* addons;
 
-gboolean response_cb (GtkDialog *dialog,
-                    gint response,
-                    gpointer user_data);
+} FcitxMainWindow;
+
+typedef struct {
+    GtkWindowClass parent_class;
+} FcitxMainWindowClass;
+
+GType fcitx_main_window_get_type(void);
+
+GtkWidget* fcitx_main_window_new(void);
 
 #endif

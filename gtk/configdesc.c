@@ -14,7 +14,7 @@
  *   You should have received a copy of the GNU General Public License     *
  *   along with this program; if not, write to the                         *
  *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
 #include <fcitx-utils/uthash.h>
@@ -25,33 +25,29 @@
 
 #include "configdesc.h"
 
-typedef struct ConfigDescSet
-{
+typedef struct ConfigDescSet {
     char *filename;
-    ConfigFileDesc *cfdesc;
+    FcitxConfigFileDesc *cfdesc;
     UT_hash_handle hh;
 } ConfigDescSet;
 
 static ConfigDescSet* cdset = NULL;
 
-ConfigFileDesc *get_config_desc(char *filename)
+FcitxConfigFileDesc *get_config_desc(char *filename)
 {
     ConfigDescSet *desc = NULL;
     HASH_FIND_STR(cdset, filename, desc);
-    if (!desc)
-    {
-        FILE * tmpfp = GetXDGFileWithPrefix("configdesc", filename, "r", NULL);
-        if (tmpfp)
-        {
+    if (!desc) {
+        FILE * tmpfp = FcitxXDGGetFileWithPrefix("configdesc", filename, "r", NULL);
+        if (tmpfp) {
             desc = malloc(sizeof(ConfigDescSet));
-            memset(desc, 0 ,sizeof(ConfigDescSet));
+            memset(desc, 0 , sizeof(ConfigDescSet));
             desc->filename = strdup(filename);
-            desc->cfdesc = ParseConfigFileDescFp(tmpfp);
+            desc->cfdesc = FcitxConfigParseConfigFileDescFp(tmpfp);
             fclose(tmpfp);
 
             HASH_ADD_KEYPTR(hh, cdset, desc->filename, strlen(desc->filename), desc);
-        }
-        else
+        } else
             return NULL;
     }
 

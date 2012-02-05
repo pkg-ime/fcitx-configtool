@@ -14,7 +14,7 @@
  *   You should have received a copy of the GNU General Public License     *
  *   along with this program; if not, write to the                         *
  *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
 #include <gtk/gtk.h>
@@ -40,56 +40,37 @@ static void end_key_grab(KeyGrabButton *self);
 static GtkWidget* popup_new(GtkWidget* parent, const gchar* text, gboolean mouse);
 static void on_key_press_event(GtkWidget *self, GdkEventKey *event, gpointer v);
 
-//注册自定义控件
-GtkType keygrab_button_get_type(void)
-{
-    static GtkType keygrab_button_type = 0;
-    if(!keygrab_button_type)
-    {
-        GtkTypeInfo keygrab_button_info = {
-            "KeyGrabButton",
-            sizeof(KeyGrabButton),
-            sizeof(KeyGrabButtonClass),
-            (GtkClassInitFunc)keygrab_button_class_init,
-            (GtkObjectInitFunc)keygrab_button_init,
-            NULL,
-            NULL,
-            NULL
-        };
-        keygrab_button_type = gtk_type_unique(GTK_TYPE_BUTTON, &keygrab_button_info);
-    }
-    return keygrab_button_type;
-}
+G_DEFINE_TYPE(KeyGrabButton, keygrab_button, GTK_TYPE_BUTTON)
 
 static void keygrab_button_init(KeyGrabButton *keygrabbutton)
 {
     keygrab_button_set_key(keygrabbutton, 0, 0);
-    gtk_signal_connect(GTK_OBJECT(keygrabbutton), "clicked", GTK_SIGNAL_FUNC(begin_key_grab), NULL);
+    g_signal_connect(G_OBJECT(keygrabbutton), "clicked", (GCallback) begin_key_grab, NULL);
 }
 
 static void keygrab_button_class_init(KeyGrabButtonClass *keygrabbuttonclass)
 {
-    GtkObjectClass *object_class;
-    object_class = (GtkObjectClass*)keygrabbuttonclass;
+    GObjectClass *object_class;
+    object_class = (GObjectClass*)keygrabbuttonclass;
     keygrab_button_signals[KEYGRAB_BUTTON_CHANGED] = g_signal_new("changed",
-                    G_TYPE_FROM_CLASS(object_class),
-                    G_SIGNAL_RUN_FIRST,
-                    G_STRUCT_OFFSET(KeyGrabButtonClass, changed),
-                    NULL,NULL,
-                    g_cclosure_marshal_VOID__VOID,
-                    G_TYPE_NONE, 0, NULL);
+            G_TYPE_FROM_CLASS(object_class),
+            G_SIGNAL_RUN_FIRST,
+            G_STRUCT_OFFSET(KeyGrabButtonClass, changed),
+            NULL, NULL,
+            g_cclosure_marshal_VOID__VOID,
+            G_TYPE_NONE, 0, NULL);
     keygrab_button_signals[KEYGRAB_BUTTON_CURRENT_CHANGED] = g_signal_new("current-changed",
-                    G_TYPE_FROM_CLASS(object_class),
-                    G_SIGNAL_RUN_FIRST,
-                    G_STRUCT_OFFSET(KeyGrabButtonClass, current_changed),
-                    NULL,NULL,
-                    g_cclosure_marshal_VOID__VOID,
-                    G_TYPE_NONE, 0, NULL);
+            G_TYPE_FROM_CLASS(object_class),
+            G_SIGNAL_RUN_FIRST,
+            G_STRUCT_OFFSET(KeyGrabButtonClass, current_changed),
+            NULL, NULL,
+            g_cclosure_marshal_VOID__VOID,
+            G_TYPE_NONE, 0, NULL);
 }
 //创建新的自定义控件
 GtkWidget* keygrab_button_new(void)
 {
-    return GTK_WIDGET(g_object_new(TYPE_KEYGRAB_BUTTON,0));
+    return GTK_WIDGET(g_object_new(TYPE_KEYGRAB_BUTTON, 0));
 }
 
 
@@ -99,17 +80,17 @@ void begin_key_grab(KeyGrabButton* self, gpointer v)
     KeyGrabButton* b = KEYGRAB_BUTTON(self);
     b->popup = popup_new(GTK_WIDGET(self), _("Please press the new key combination"), FALSE);
     gtk_widget_show_all(b->popup);
-    b->handler = gtk_signal_connect(GTK_OBJECT(b->popup), "key-press-event", GTK_SIGNAL_FUNC(on_key_press_event), b);
+    b->handler = g_signal_connect(G_OBJECT(b->popup), "key-press-event", (GCallback)on_key_press_event, b);
 
-    while(gdk_keyboard_grab(gtk_widget_get_window(GTK_WIDGET(b->popup)), FALSE, GDK_CURRENT_TIME) != GDK_GRAB_SUCCESS)
-           usleep(100);
+    while (gdk_keyboard_grab(gtk_widget_get_window(GTK_WIDGET(b->popup)), FALSE, GDK_CURRENT_TIME) != GDK_GRAB_SUCCESS)
+        usleep(100);
 }
 
 void end_key_grab(KeyGrabButton *self)
 {
     KeyGrabButton* b = KEYGRAB_BUTTON(self);
     gdk_keyboard_ungrab(gtk_get_current_event_time());
-    gtk_signal_disconnect(b->popup, b->handler);
+    g_signal_handler_disconnect(b->popup, b->handler);
     gtk_widget_destroy(b->popup);
 }
 
@@ -119,42 +100,26 @@ void on_key_press_event(GtkWidget *self, GdkEventKey *event, gpointer v)
     guint key;
     GdkModifierType mods = event->state & gtk_accelerator_get_default_mod_mask();
 
-#if GTK_MINOR_VERSION < 22
-    if ((event->keyval == GDK_Escape
-            || event->keyval == GDK_Return) && !mods)
-#else
     if ((event->keyval == GDK_KEY_Escape
-            || event->keyval == GDK_KEY_Return) && !mods)
-#endif
-    {
-#if GTK_MINOR_VERSION < 22
-        if (event->keyval == GDK_Escape)
-#else
+            || event->keyval == GDK_KEY_Return) && !mods) {
         if (event->keyval == GDK_KEY_Escape)
-#endif
-            gtk_signal_emit_by_name(GTK_OBJECT(b), "changed", b->key, b->mods);
+            g_signal_emit_by_name(G_OBJECT(b), "changed", b->key, b->mods);
         end_key_grab(b);
         keygrab_button_set_key(b, 0, 0);
         return;
     }
 
     key = gdk_keyval_to_upper(event->keyval);
-#if GTK_MINOR_VERSION < 22
-    if (key == GDK_ISO_Left_Tab)
-        key = GDK_Tab;
-#else
     if (key == GDK_KEY_ISO_Left_Tab)
         key = GDK_KEY_Tab;
-#endif
 
     if (gtk_accelerator_valid(key, mods)
-            || (key == GDK_Tab && mods))
-    {
+            || (key == GDK_KEY_Tab && mods)) {
         keygrab_button_set_key(b, key, mods);
         end_key_grab(b);
         b->key = key;
         b->mods = mods;
-        gtk_signal_emit_by_name(GTK_OBJECT(b), "changed", b->key, b->mods);
+        g_signal_emit_by_name(G_OBJECT(b), "changed", b->key, b->mods);
         return;
     }
 
@@ -168,14 +133,11 @@ void keygrab_button_set_key(KeyGrabButton* self, guint key, GdkModifierType mods
     b->key = key;
     b->mods = mods;
 
-    label = GetKeyString(key, mods);
+    label = FcitxHotkeyGetKeyString(key, mods);
 
-    if (label == NULL || strlen(label) == 0)
-    {
+    if (label == NULL || strlen(label) == 0) {
         gtk_button_set_label(GTK_BUTTON(b), _("Disabled"));
-    }
-    else
-    {
+    } else {
         gchar* lb = label;
         gtk_button_set_label(GTK_BUTTON(b), lb);
     }
@@ -202,8 +164,7 @@ GtkWidget* popup_new(GtkWidget* parent, const gchar* text, gboolean mouse)
     gtk_window_set_modal(GTK_WINDOW(w), TRUE);
     gtk_window_set_decorated(GTK_WINDOW(w), TRUE);
     gtk_window_set_skip_taskbar_hint(GTK_WINDOW(w), TRUE);
-    if (text)
-    {
+    if (text) {
         GtkWidget* label = gtk_label_new(text);
         GtkWidget* align = gtk_alignment_new(0, 0, 1, 1);
         gtk_alignment_set_padding(GTK_ALIGNMENT(align), 20, 20, 20, 20);
