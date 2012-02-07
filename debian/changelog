@@ -1,3 +1,9 @@
+fcitx-configtool (0.4.0-2) unstable; urgency=low
+
+  * Enable GTK3, disable GTK2.
+
+ -- Aron Xu <aron@debian.org>  Wed, 08 Feb 2012 02:04:57 +0800
+
 fcitx-configtool (0.4.0-1) unstable; urgency=low
 
   * New upstream release: for fcitx 4.2.0.
